@@ -202,7 +202,6 @@ O código ficará disponível na última atividade da aula atual, em O que apren
 
 @@05
 Reflexão sobre structs
-PRÓXIMA ATIVIDADE
 
 Para criar uma nova struct, usamos o prefixo type, seguido do nome da struct, o sufixo struct e declaramos os campos entre chaves, conforme o exemplo abaixo:
 type Pessoa struct {
@@ -226,7 +225,6 @@ Só permite criar um novo tipo informando o nome dos campos.
 
 @@06
 Para saber mais
-PRÓXIMA ATIVIDADE
 
 Inicialização zero e nil
 Mesmo não provendo nenhum valor, o Go garante inicializar todas as variáveis, conforme a imagem abaixo:
@@ -301,7 +299,6 @@ https://play.golang.org/p/Ri6dLuyhjeg
 
 @@07
 Faça como eu fiz na aula
-PRÓXIMA ATIVIDADE
 
 Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito.
 Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
@@ -310,7 +307,6 @@ O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha cert
 
 @@08
 O que aprendemos?
-PRÓXIMA ATIVIDADE
 
 Nessa aula:
 Criamos nossa primeira struct chamada ContaCorrente;
@@ -327,4 +323,622 @@ Vamos entender na prática o que são ponteiros, aprender uma outra forma de uti
 https://github.com/alura-cursos/go_oo/archive/master.zip
 
 https://github.com/alura-cursos/go_oo
+
+#### 19/09/2023
+
+@02-Referência, ponteiro e métodos
+
+@@01
+New e ponteiros
+
+Vimos duas formas de utilizar a struct, a primeira passando o campo e o valor que queremos armazenar dentro dessas variáveis e a segunda passando o conteúdo sem especificar os campos, desde que eles estejam na ordem em que foram declarados.
+Será que só existem essas formas de utilizar a struct? Não, há a opção de usá-la de forma similar a outras linguagens de programação como Java e C#. Aprenderemos como.
+
+Nosso primeiro passo será declarar uma variável chamada contaDaCris. Ela será do tipo ContaCorrente. Na linha seguinte, faremos contaDaCris = new(). A palavra new é bastante conhecida de quem já programa em Java ou C#. Dentro dos parênteses passaremos o tipo, que é ContaCorrente.
+
+A partir de então, conseguiremos atribuir os valores acrescentando um ponto (.) após contaDaCris e o nome do campo na sequência. Então atribuiremos o valor desse campo.
+
+var contaDaCris ContaCorrente
+contaDaCris = new(ContaCorrente)
+contaDaCris.titular = "Cris"
+
+fmt.Println(contaDaCris)COPIAR CÓDIGO
+Teclaremos "Command + J" para abrir o terminal e "Ctrl + L" para limpá-lo. O "Command + S" será necessário para salvar o código. Porém, aparecerá um erro, pois não podemos utilizar nosso tipo ContaCorrente já atribuindo um valor. Isso porque temos uma variável do tipo ContaCorrente, a contaDaCris. Mas o código não entendeu que o tipo da variável é o mesmo que está sendo passado para new(). Precisamos identificar que se tratam do mesmo tipo.
+
+Para conseguir dizer que contaDaCris aponta para uma ContaCorrente, colocaremos um asterisco na frente. Teremos var contaDaCris *ContaCorrente.
+
+Agora não teremos mais nenhum erro. Limparemos o terminal e vamos roda de novo. Veremos no terminal:
+
+&{Cris 0 0 0}
+
+Esse resultado se deve a só termos atribuído o nome, então os outros valores tomaram a forma de zero velho. Atribuiremos agora os demais valores.
+
+Mas por que o "&" e por que temos que apontar para ContaCorrente com asterisco? Nas outras alternativas de uso da struct, o código entendia que que a conta corrente do cliente apontava para um tipo, uma estrutura de conta.
+
+Exemplificaremos o que está acontecendo. Vamos imaginar que um edifício tem uma cobertura super bonita, apertamentos maiores no penúltimo e no último andar, e o térreo e o primeiro andar têm todos os apartamentos do mesmo tamanho.
+
+Para cada apartamento há uma caixa de correio que os identifica. As correspondências que chegam para cada apartamento ficam nas respectivas caixas de correio. Eles possuírem tamanhos diferentes é um ponto importante.
+
+Isso quer dizer que nossas caixas de correio são como os nossos ponteiros ou referências. Cada caixa, independentemente do tamanho do apartamento, apontará para o mesmo lugar se tratando do edifício. Os ponteiros também serão todos iguais. Porém, quando falamos de cada apartamento, os ponteiros apontarão para lugares diferentes do prédio.
+
+Para concluir, as caixas do correio serão nossos ponteiros. O edifício será a memória da nossa aplicação, o local em que podemos armazenar informações. Cada apartamento corresponde a um tipo a ser armazenado.
+
+Então existem tipos menores, os relacionados com os apartamentos do térreo e primeiro andar, onde não precisamos de muito espaço para o armazenamento. O segundo andar será semelhante.
+
+No terceiro andar já teremos um apartamento maior, que permite guardar elementos maiores. O ponteiro, no entanto, será do mesmo tamanho. Essa é apenas uma reflexão simples do que ocorre no nosso desenvolvimento.
+
+Então a contaDaCris precisa apontar para ContaCorrente. O código em Go não entenderá corretamente se tirarmos e asterisco e salvarmos a aplicação, pois ficará sem entender para onde new está apontando, se é a conta corrente da Cris ou uma nova conta. A partir do momento em que o ponteiro é colocado, é como se alocássemos um espaço e disséssemos que a caixa do correio aponta para um apartamento em particular.
+
+A caixa de correio contaDaCris apontará para o apartamento ContaCorrente . Podemos criar cada um dos campos da conta corrente de Cris de acordo com a struct. Criaremos o saldo nesse momento, com contadaCris.saldo = 500.
+
+O último detalhe será o "&" que aparece no terminal quando fazemos a impressão do que temos. Isso porque seguindo o mesmo raciocínio do nosso exemplo, &{Cris 0 0 500} indica que os campos são um conteúdo que está dentro do apartamento. Mas "&" não é interessante para nós, somente o conteúdo.
+
+Por isso, colocaremos o asterisco em contaDaCris também na hora da impressão.
+
+var contaDaCris *ContaCorrente
+contaDaCris = new(ContaCorrente)
+contaDaCris.titular = "Cris"
+contaDaCris.saldo = 500
+
+
+fmt.Println(*contaDaCris)COPIAR CÓDIGO
+Se limparmos o terminal e rodarmos de novo, o resultado será igual ao que teríamos usando as outras opções para structs, {Cris 0 0 500} somente.
+
+Então, por debaixo dos panos ocorrerá todo o processo referente aos ponteiros e à alocação da memória nos outros códigos também.
+
+A pergunta que fica é: com qual forma de usar structs é mais fácil trabalhar. Podemos usar a técnica de escrever contaDoGuilherme := ContaCorrente{titular: "Guilherme", saldo: 125.5} quando provavelmente não vamos precisar sempre de todos os campos preenchidos.
+
+A segunda forma, contaDaBruna := ContaCorrente{"Bruna", 222, 111222, 200} é mais indicada quando todos os campos serão utilizáveis. Esses serão os modos mais compatíveis com o Go.
+
+Mas o terceiro modo também é importante sabermos usar, pois se precisar lidar com um projeto com esse modelo, saberá do que se tratam os ponteiros e como manipular esses dados.
+
+Essa foi uma aula para termos ideia de que existe essa alternativa e como utilizá-la, mas nos próximos momentos trabalharemos sempre com o primeiro ou o segundo jeitos de lidar com structs.
+
+@@02
+Comparando tipos
+
+Vimos algumas formas de utilizar nossa struct. Mas para entender um pouco mais a fundo o conceito de ponteiro, faremos um teste juntos.
+Selecionaremos todo o código a partir de contaDaBruna := ContaCorrente{"Bruna", 222, 111222, 200} até embaixo, vamos segurar a tecla "Command" e pressionar a barra "//". Assim comentaremos esse trecho do código e ele não será mais executado.
+
+Tiraremos apenas o comentário de fmt.Println(contaDoGuilherme), pois queremos exibi-lo. Se salvarmos, não teremos nenhuma mensagem de erro, pois a criação de contaDoGuilherme já tinha sido feita anteriormente.
+
+Agora criaremos outra conta. Vamos copiar a variável contaDoGuilherme com todas as informações de campos e chamar a duplicata de contaDoGuilherme2
+
+contaDoGuilherme := ContaCorrente{titular: "Guilherme", numeroAgencia: 589, numeroConta: 123456, saldo: 125.5}
+
+contaDoGuilherme2 := ContaCorrente{titular: "Guilherme", numeroAgencia: 589, numeroConta: 123456, saldo: 125.5}COPIAR CÓDIGO
+Vamos salvar o código e veremos uma mensagem de erro nos dizendo que contaDoGuilherme2 foi usada mas não foi declarada. Podemos resolver isso acrescentando a variável à exibição em fmt.Println(contaDoGuilherme, contaDoGuilherme2).
+
+Salvaremos e rodaremos no terminal com go run main.go. Será impresso o conteúdo de ambas as contas, que é o mesmo. Mas não queremos exibir o conteúdo. Vamos comparar se elas de fato são iguais, e para isso usaremos o sinal de "==".
+
+fmt.Println(contaDoGuilherme == contaDoGuilherme2)
+
+Limparemos o terminal mais uma vez e quando executarmos, teremos como resposta a palavra "true", que significa "verdadeiro" em Inglês. Então, por mais que eu tenha um apartamento com um conteúdo e tenha outro apartamento com o mesmo conteúdo, o Go é inteligente o bastante para entender que não estamos tentando saber se as informações se referem a uma conta (apartamento) ou outra. Ele compara o conteúdo de ambos e avisa que o resultado da comparação é verdadeiro.
+
+Mas vamos mudar um valor. Colocaremos "580" no numeroAgencia de contaDoGuilherme2, deixando "589" em contaDoGuilherme. Rodaremos a comparação novamente e dessa vez aparecerá a mensagem "false" no terminal, ou seja, falso, pois com a alteração não é mais verdadeiro que o conteúdo das duas variáveis é comparável.
+
+Então, como fizemos esse procedimento de comparação para contaDoGuilherme, faremos o mesmo para contaDaBruna. Comentaremos os trechos do código referentes a contaDoGuilherme, apagaremos contaDoGuilherme2 e descomentar os demais.
+
+Então, da mesma forma que foi feito anteriormente, no método que passa todos os campos e as informações referentes a eles, criaremos contaDaBruna2 com o mesmo conteúdo da primeira variável e vamos compará-las no print.
+
+contaDaBruna := ContaCorrente{"Bruna", 222, 111222, 200}
+contaDaBruna2 := ContaCorrente{"Bruna", 222, 111222, 200}
+
+fmt.Println(contaDaBruna == contaDaBruna2)
+}
+COPIAR CÓDIGO
+Vamos executar o código e o terminal exibirá "true", já que o conteúdo de ambas as variáveis é igual. Se trocarmos o Número da Conta de contaDaBruna para "111" no lugar de "222", mantendo o de contaDaBruna2, e rodarmos novamente, aparecerá a palavra "false" no terminal, porque os conteúdos dos endereços agora são diferentes.
+
+Então, o modo Go de escrever o código utilizando o sinal de dois pontos e igual (:=) e a ContaCorrente{} (com conteúdo entre chaves) entende que quando fazemos uma comparação queremos levar em comparação o conteúdo dos apartamentos.
+
+Substituiremos a impressão por contaDoGuilherme e depois comentaremos.
+
+// fmr.Print(contaDoGuilherme)
+
+Agora faremos o mesmo para contaDaCris. Primeiramente criaremos contaDaCris2. Por fim, compararemos ambas as contas e imprimiremos o resultado.
+
+var contaDaCris *ContaCorrente
+contaDaCris = new(ContaCorrente)
+contaDaCris.titular = "Cris"
+contaDaCris.titular = 500
+
+var contaDaCris2 *ContaCorrente
+contaDaCris2 = new(ContaCorrente)
+contaDaCris2.titular = "Cris"
+contaDaCris2.titular = 500
+
+fmt.Println(contaDaCris == contaDaCris2)COPIAR CÓDIGO
+Salvaremos o código e vamos executar. No entanto, aparecerá no terminal que isso é falso, diferentemente dos outros dois casos em que havendo o mesmo conteúdo nos campos das contas, a comparação era verdadeira.
+
+Podemos exibir o conteúdo de ambas:
+
+fmt.Println(contaDaCris)
+fmt.Println(contaDaCris2)COPIAR CÓDIGO
+No terminal, os valores exibidos serão exatamente os mesmos para ambas, &(Cris 0 0 500}. Entretanto, a comparação é falsa de todo modo. Ele mesmo dá a dica, mostrando o & na frente de cada um dos conjuntos de valores, pois se tratam de endereços diferentes. Vamos pegar apenas o conteúdo desses endereços para comparar.
+
+var contaDaCris *ContaCorrente
+contaDaCris = new(ContaCorrente)
+contaDaCris.titular = "Cris"
+contaDaCris.titular = 500
+
+var contaDaCris2 *ContaCorrente
+contaDaCris2 = new(ContaCorrente)
+contaDaCris2.titular = "Cris"
+contaDaCris2.saldo = 500
+
+fmt.Println(contaDaCris)
+fmt.Println(contaDaCris2)
+
+fmt.Println(*contaDaCris == *contaDaCris2)COPIAR CÓDIGO
+Agora, mesmo mostrando que os endereços são diferentes, o resultado será que os conteúdos são iguais, com verdadeiro para a comparação no terminal. Poderemos visualizar também o endereço, colocando o & no início de ambas as variáveis na hora de exibi-las.
+
+fmt.Println(&contaDaCris)
+fmt.Println(&contaDaCris2)
+
+fmt.Println(*contaDaCris == *contaDaCris2)COPIAR CÓDIGO
+Agora será mostrado o local na memória do computador onde a conta estará, um valor complexo, que mistura números e letras, com o final "e020" para contaDaCris, outro com final "e028" para contadaCris2. Sendo "20" e "28" números diferentes, os endereços são diferentes. Se uma casa é a número 20 e a outra número 28, por mais que sejam iguais, tenham o mesmo tamanho e mobília, são casas diferentes.
+
+Só que quando comparamos os conteúdos de ambos os endereços, eles serão iguais. Essas questões servem para aprofundarmos nosso conhecimento quanto aos ponteiros.
+
+Os ponteiros são muito utilizados em linguagens como C e C++ e trabalhar com eles é um grande desafio. O maior benefício de sabermos a diferença entre endereços que alocam informações na memória estará no autodesempenho, ou seja as pessoas que que usam C e C++ conseguem ter um alto desempenho dessa forma, com boa velocidade.
+
+Felizmente no Go vimos que a linguagem tem a capacidade de comparar o conteúdo armazenado em dois endereços independentemente da diferença entre eles.
+
+@@03
+Criando o método sacar
+
+Sacar ou depositar um dinheiro em uma conta corrente é um comportamento comum.
+Com base no código que desenvolvemos até agora desenvolveremos um comportamento de saque.Removeremos as nossas comparação entre tipos e criaremos uma nova conta corrente, contaDaSilvia.
+
+Ela será do tipo ContaCorrente, terá como titular a string "Silvia" e saldo de 500. Vamos exibir a conta para visualizá-la no nosso terminal.
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia)
+
+}COPIAR CÓDIGO
+Executamos e no terminal haverá {Silvia 0 0 500}, ou seja, o nome do titular, dois zeros referentes aos valores de Número da Agência e Conta que não adicionamos, e "500" que é o valor do nosso saldo. Podemos exibir apenas o saldo:
+
+fmt.Println(contaDaSilvia.saldo)
+
+Executaremos mais uma vez e veremos apenas o valor do saldo, "500".
+
+Para sacar um valor, criaremos uma nova variável, valorDoSaque, e usaremos dois pontos igual (:=) para atribuir um valor de "200". Se a conta tem "500" e removeremos "200", ficaremos com "300" de saldo.Então o valor do saldo, contaDaSilvia.saldo será igual a contaDaSilvia.saldo menos valorDoSaque'. Depois, exibiremos mais uma vez o valor que Silvia possui na conta.
+
+valorDoSaque := 200
+contaDaSilvia.saldo = contaDaSilvia.saldo - valorDoSaque
+
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Quando salvamos, porem, o compilador mostra um alerta de erro, e se passarmos o mouse sobre a linha sublinhada em vermelho entenderemos que o problema é tentamos fazer uma operação entre um valor do tipo float e outro do tipo inteiro. valorDoSaque foi criado como um inteiro, mas o saldo é um float. Nesse caso, bastará colocar um ponto (.) após o valor atribuído ao valorDoSaque e a linguagem entenderá que ele é um float.
+
+valorDoSaque := 200.
+
+Agora, quando executarmos o código, teremos primeiro o "500", valor de saldo que printamos, e depois o cálculo será efetuado e veremos como resultado o valor "300" no terminal. Mas vamos supôr que queremos remover "800" da conta. A cliente não tem esse saldo, então ultrapassaremos o valor.
+
+valorDoSaque := .800
+
+Vamos rodar e o que aparecerá no terminal agora será "-300". Isso não deveria acontecer, pois temos apenas "500" na conta. Para evitar o problema podemos gerar uma verificação para esse saque.
+
+Pensando nisso, criaremos uma função que verificará se o valor que tentaremos sacar será menor do que o valor presente na conta. Vamos criá-la antes da func main(), logo após nossa struct. , chamaremos a função de Sacar() e ela receberá um valor. Nosso valor do saque deverá ser executado nos parênteses da função. Também especificaremos que ele será do tipo float64.
+
+Depois dos parâmetros, retornaremos uma mensagem do tipo string nesse campo, informando se o saque foi realizado com sucesso ou não. Então criaremos uma variável para verificar se é possível sacar com podeSacar :=, pegaremos valorDoSaque e vamos comparar se ele é menor ou igual ao saldo de contaDaSilvia.
+
+Podemos fazer podeSacar := valorDoSaque <= contaDaSilvia.saldo, porém nesse campo precisamos dizer qe quem tentará fazer o saque será a pessoa responsável pela conta. Nesse caso só temos contaDaSilvia, mas se tivermos que adicionar ainda outros clientes, teremos criado uma função que só funciona para contaDaSilvia. Queremos que sempre quando alguém tentar sacar, apontemos para a conta dessa pessoa, de forma semelhante ao que acontece com o this do Java ou o self do Python.
+
+Para referenciarmos esse ponteiro no momento da criação do tipo, podemos colocar entre parênteses logo após func e antes de Sacar() a inscrição (c *ContaCorrente), o que significa que quando a função for chamada, o código apontará para a conta que chama. Nesse caso, quando chamarmos a função, não precisaremos especificar que nos tratamos da conta de um cliente ou outro.
+
+Nesse caso, se a conta que estiver chamando a função tiver saldo, será possível sacar. Criaremos uma condicional if para fazer a verificação. Poderemos sacar se for verdadeiro que valorDoSaque é menor do que saldo. Se podemos sacar colocaremos c.saldo no corpo do if. Podíamos escrever conta.saldo, se escrevêssemos (conta *ContaCorrente) , mas por uma questão da linguagem Go, sempre utilizamos a primeira letra do nome no nosso ponteiro dentro da função.
+
+Porém, escrevemos muito para fazer nossa operação usando contaDaSilvia.saldo = contaDaSilvia.saldo - valorDoSaque. O que queremos fazer é pegar o que há na conta e subtrair pelo valor do saque. Há outra forma de fazer o mesmo, e a utilizaremos na função, com c.saldo -= valorDoSaque.
+
+O valorDoSaque será o valor que passaremos para esse método. Assim, será possível remover o valor para sacar se ele for menor do que o saldo, e retornaremos uma mensagem do tipo string, entre aspas duplas, "Saque realizado com sucesso".
+
+Mas e se isso não for verdade? Então, teremos o else para o caso do valor que tentarmos sacar ser maior do que o saldo. Retornaremos "Saldo insuficiente".
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque <= c.saldo
+    if podeSacar {
+            c.saldo -= valorDoSaque
+            return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}COPIAR CÓDIGO
+Criamos função para verificar se o valor do saque é menor do que o do saldo. Se sim, poderemos sacar.
+
+Apagaremos contaDoGustado do fim do código, pois nosso interese nesse momento é visualizar apenas a conta da Silvia. O valor do saldo dela, "500", já estará sendo exibido com um print.
+
+Agora, no lugar de fazer toda a operação em que o saldo é igual ao saldo menos o saque e vamos apenas chamar a função Sacar() .Bastará digitarmos contaDaSilvia e um ponto (.) para que Sacar() seja sugeridp.
+
+Como essa função devolve uma string, podemos colocá-la dentro da string dos parâmetros do print. Quando digitamos contadaSilvia., conseguimos visualizar todos os campos que temos pressionando "Ctrl + espaço" para ter acesso ao atalho. Após contadaSilvia.sacar terá que vir o abrir e fechar de parênteses (), pois queremos executar. Colocando os parênteses, já será recomendado definir o valor do saque. Colocaremos "300".
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo)
+
+    fmt.Println(contaDaSilvia.Sacar(300))
+}COPIAR CÓDIGO
+Abriremos o terminal com "Command + J", o limparemos com "Ctrl + L" e executaremos mais uma vez.
+
+Veremos o valor "500" que havia na conta e em seguida a mensagem de que o saque foi realizado com sucesso. Pediremos para que o código nos mostre quanto restou na conta da Silvia depois do saque colocando outro print embaixo do saque.
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(300))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Agora veremos que tínhamos "500", realizamos com sucesso o saque (de 300) e será impresso que ficamos com "200". Então nossa função terá funcionado para quando temos saldo. Mas e quando não temos?
+
+Tentaremos sacar "600" para testar.
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(600))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Digitaremos "Ctrl + L" e executaremos mais uma vez o programa. Agora veremos a mensagem "Saldo insuficiente" e o valor do saldo permanecerá em "500". Parece que tudo está funcionando, exceto por um detalhe.
+
+Tínhamos "500" de saldo. Ao tentar sacar "600", não foi possível porque "600" é maior do que "500". Só que se o valor do saque for um valor negativo?
+
+Tentaremos sacar "-100".
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(-100))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Quanto teremos de saldo quando executarmos a função? "-100" é menor do que "500", condição para que o saque seja realizado.
+
+Quando rodarmos, veremos que a mensagem é a de que o saque de "-100" foi realizado com sucesso, e o valor restante será "600". Ou seja, a operação efetuada foi a do valor do saldo menos menos (- (-)) o valorDoSaque , de forma que o valor ficou positivo e foi atribuído mais "100" ao que havia na conta.
+
+Então, além de verificar se o valor do saque é maior do que o saldo, precisamos simultaneamente verificar se ele é um valor positivo, maior do que 0. Para isso, colocaremos && e assim para que podeSacar, que é um booleano (pode ser verdadeiro ou falso), seja verdadeiro, estas duas condições precisam ser verdadeiras.
+
+podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+
+Vamos salvar e executar mais uma vez. Veremos que p saldo era "500", tentando sacar "-100" o saldo será insuficiente e serão mantidos os "500" na conta de Silvia. Não foi possível realizar o saque.
+
+Agora se tentarmos sacar outro valor, como "400", o saque será realizado com scesso e ainda haverá "100" na conta.
+
+type ContaCorrente struct {
+    titular       string
+    numeroAgencia int
+    numeroConta   int
+    saldo         float64
+}
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo)
+
+    fmt.Println(contaDaSilvia.Sacar(400))
+    fmt.Println(contaDaSilvia.saldo)
+
+}
+
+@@03
+Criando o método sacar
+
+Sacar ou depositar um dinheiro em uma conta corrente é um comportamento comum.
+Com base no código que desenvolvemos até agora desenvolveremos um comportamento de saque.Removeremos as nossas comparação entre tipos e criaremos uma nova conta corrente, contaDaSilvia.
+
+Ela será do tipo ContaCorrente, terá como titular a string "Silvia" e saldo de 500. Vamos exibir a conta para visualizá-la no nosso terminal.
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia)
+
+}COPIAR CÓDIGO
+Executamos e no terminal haverá {Silvia 0 0 500}, ou seja, o nome do titular, dois zeros referentes aos valores de Número da Agência e Conta que não adicionamos, e "500" que é o valor do nosso saldo. Podemos exibir apenas o saldo:
+
+fmt.Println(contaDaSilvia.saldo)
+
+Executaremos mais uma vez e veremos apenas o valor do saldo, "500".
+
+Para sacar um valor, criaremos uma nova variável, valorDoSaque, e usaremos dois pontos igual (:=) para atribuir um valor de "200". Se a conta tem "500" e removeremos "200", ficaremos com "300" de saldo.Então o valor do saldo, contaDaSilvia.saldo será igual a contaDaSilvia.saldo menos valorDoSaque'. Depois, exibiremos mais uma vez o valor que Silvia possui na conta.
+
+valorDoSaque := 200
+contaDaSilvia.saldo = contaDaSilvia.saldo - valorDoSaque
+
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Quando salvamos, porem, o compilador mostra um alerta de erro, e se passarmos o mouse sobre a linha sublinhada em vermelho entenderemos que o problema é tentamos fazer uma operação entre um valor do tipo float e outro do tipo inteiro. valorDoSaque foi criado como um inteiro, mas o saldo é um float. Nesse caso, bastará colocar um ponto (.) após o valor atribuído ao valorDoSaque e a linguagem entenderá que ele é um float.
+
+valorDoSaque := 200.
+
+Agora, quando executarmos o código, teremos primeiro o "500", valor de saldo que printamos, e depois o cálculo será efetuado e veremos como resultado o valor "300" no terminal. Mas vamos supôr que queremos remover "800" da conta. A cliente não tem esse saldo, então ultrapassaremos o valor.
+
+valorDoSaque := .800
+
+Vamos rodar e o que aparecerá no terminal agora será "-300". Isso não deveria acontecer, pois temos apenas "500" na conta. Para evitar o problema podemos gerar uma verificação para esse saque.
+
+Pensando nisso, criaremos uma função que verificará se o valor que tentaremos sacar será menor do que o valor presente na conta. Vamos criá-la antes da func main(), logo após nossa struct. , chamaremos a função de Sacar() e ela receberá um valor. Nosso valor do saque deverá ser executado nos parênteses da função. Também especificaremos que ele será do tipo float64.
+
+Depois dos parâmetros, retornaremos uma mensagem do tipo string nesse campo, informando se o saque foi realizado com sucesso ou não. Então criaremos uma variável para verificar se é possível sacar com podeSacar :=, pegaremos valorDoSaque e vamos comparar se ele é menor ou igual ao saldo de contaDaSilvia.
+
+Podemos fazer podeSacar := valorDoSaque <= contaDaSilvia.saldo, porém nesse campo precisamos dizer qe quem tentará fazer o saque será a pessoa responsável pela conta. Nesse caso só temos contaDaSilvia, mas se tivermos que adicionar ainda outros clientes, teremos criado uma função que só funciona para contaDaSilvia. Queremos que sempre quando alguém tentar sacar, apontemos para a conta dessa pessoa, de forma semelhante ao que acontece com o this do Java ou o self do Python.
+
+Para referenciarmos esse ponteiro no momento da criação do tipo, podemos colocar entre parênteses logo após func e antes de Sacar() a inscrição (c *ContaCorrente), o que significa que quando a função for chamada, o código apontará para a conta que chama. Nesse caso, quando chamarmos a função, não precisaremos especificar que nos tratamos da conta de um cliente ou outro.
+
+Nesse caso, se a conta que estiver chamando a função tiver saldo, será possível sacar. Criaremos uma condicional if para fazer a verificação. Poderemos sacar se for verdadeiro que valorDoSaque é menor do que saldo. Se podemos sacar colocaremos c.saldo no corpo do if. Podíamos escrever conta.saldo, se escrevêssemos (conta *ContaCorrente) , mas por uma questão da linguagem Go, sempre utilizamos a primeira letra do nome no nosso ponteiro dentro da função.
+
+Porém, escrevemos muito para fazer nossa operação usando contaDaSilvia.saldo = contaDaSilvia.saldo - valorDoSaque. O que queremos fazer é pegar o que há na conta e subtrair pelo valor do saque. Há outra forma de fazer o mesmo, e a utilizaremos na função, com c.saldo -= valorDoSaque.
+
+O valorDoSaque será o valor que passaremos para esse método. Assim, será possível remover o valor para sacar se ele for menor do que o saldo, e retornaremos uma mensagem do tipo string, entre aspas duplas, "Saque realizado com sucesso".
+
+Mas e se isso não for verdade? Então, teremos o else para o caso do valor que tentarmos sacar ser maior do que o saldo. Retornaremos "Saldo insuficiente".
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque <= c.saldo
+    if podeSacar {
+            c.saldo -= valorDoSaque
+            return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}COPIAR CÓDIGO
+Criamos função para verificar se o valor do saque é menor do que o do saldo. Se sim, poderemos sacar.
+
+Apagaremos contaDoGustado do fim do código, pois nosso interese nesse momento é visualizar apenas a conta da Silvia. O valor do saldo dela, "500", já estará sendo exibido com um print.
+
+Agora, no lugar de fazer toda a operação em que o saldo é igual ao saldo menos o saque e vamos apenas chamar a função Sacar() .Bastará digitarmos contaDaSilvia e um ponto (.) para que Sacar() seja sugeridp.
+
+Como essa função devolve uma string, podemos colocá-la dentro da string dos parâmetros do print. Quando digitamos contadaSilvia., conseguimos visualizar todos os campos que temos pressionando "Ctrl + espaço" para ter acesso ao atalho. Após contadaSilvia.sacar terá que vir o abrir e fechar de parênteses (), pois queremos executar. Colocando os parênteses, já será recomendado definir o valor do saque. Colocaremos "300".
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo)
+
+    fmt.Println(contaDaSilvia.Sacar(300))
+}COPIAR CÓDIGO
+Abriremos o terminal com "Command + J", o limparemos com "Ctrl + L" e executaremos mais uma vez.
+
+Veremos o valor "500" que havia na conta e em seguida a mensagem de que o saque foi realizado com sucesso. Pediremos para que o código nos mostre quanto restou na conta da Silvia depois do saque colocando outro print embaixo do saque.
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(300))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Agora veremos que tínhamos "500", realizamos com sucesso o saque (de 300) e será impresso que ficamos com "200". Então nossa função terá funcionado para quando temos saldo. Mas e quando não temos?
+
+Tentaremos sacar "600" para testar.
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(600))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Digitaremos "Ctrl + L" e executaremos mais uma vez o programa. Agora veremos a mensagem "Saldo insuficiente" e o valor do saldo permanecerá em "500". Parece que tudo está funcionando, exceto por um detalhe.
+
+Tínhamos "500" de saldo. Ao tentar sacar "600", não foi possível porque "600" é maior do que "500". Só que se o valor do saque for um valor negativo?
+
+Tentaremos sacar "-100".
+
+fmt.Println(contaDaSilvia.saldo)
+
+fmt.Println(contaDaSilvia.Sacar(-100))
+fmt.Println(contaDaSilvia.saldo)COPIAR CÓDIGO
+Quanto teremos de saldo quando executarmos a função? "-100" é menor do que "500", condição para que o saque seja realizado.
+
+Quando rodarmos, veremos que a mensagem é a de que o saque de "-100" foi realizado com sucesso, e o valor restante será "600". Ou seja, a operação efetuada foi a do valor do saldo menos menos (- (-)) o valorDoSaque , de forma que o valor ficou positivo e foi atribuído mais "100" ao que havia na conta.
+
+Então, além de verificar se o valor do saque é maior do que o saldo, precisamos simultaneamente verificar se ele é um valor positivo, maior do que 0. Para isso, colocaremos && e assim para que podeSacar, que é um booleano (pode ser verdadeiro ou falso), seja verdadeiro, estas duas condições precisam ser verdadeiras.
+
+podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+
+Vamos salvar e executar mais uma vez. Veremos que p saldo era "500", tentando sacar "-100" o saldo será insuficiente e serão mantidos os "500" na conta de Silvia. Não foi possível realizar o saque.
+
+Agora se tentarmos sacar outro valor, como "400", o saque será realizado com scesso e ainda haverá "100" na conta.
+
+type ContaCorrente struct {
+    titular       string
+    numeroAgencia int
+    numeroConta   int
+    saldo         float64
+}
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func main() {
+    contaDaSilvia := ContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo)
+
+    fmt.Println(contaDaSilvia.Sacar(400))
+    fmt.Println(contaDaSilvia.saldo)
+
+}COPIAR CÓDIGO
+
+@@04
+Depositando dez reais
+
+Para criar um método capaz de depositar R$10,00 no saldo de uma conta, foi desenvolvido o seguinte código:
+package main
+
+import (
+    "fmt"
+)
+
+type Conta struct {
+    saldo float64
+}
+
+func (c *Conta) depositarDezReais() float64 {
+    return c.saldo + 10
+}
+
+func main() {
+    contaTeste := Conta{saldo: 10}
+
+    contaTeste.depositarDezReais()
+    contaTeste.depositarDezReais()
+
+    fmt.Println(contaTeste)
+}COPIAR CÓDIGO
+Com base no trecho de código acima, marque as alternativas verdadeiras.
+
+Ao executar o código, uma mensagem de erro informará que o saldo está incorreto.
+ 
+O código acima possui um erro de lógica e não de sintaxe. Sendo assim, nenhuma mensagem de erro será exibida ao executar.
+Alternativa correta
+Ao executar o código acima, teremos o saldo de 20 como resultado.
+ 
+Ao executar esse código, não teremos como resultado do saldo o valor de 20.
+Alternativa correta
+Ao executar o código acima, teremos o saldo de 30 como resultado.
+ 
+Ao executar esse código, não teremos como resultado do saldo o valor de 30.
+Alternativa correta
+Ao executar o código acima, teremos o saldo de 10 como resultado.
+ 
+Certo! Como não atribuímos o código no saldo da conta( c.saldo = c.saldo + 10), nosso saldo continuará sendo 10. Neste link, você pode executar o código acima código.
+
+https://play.golang.org/p/aG6sxPAuk2t
+
+@@05
+Para saber mais
+
+Função com quantidade de parâmetros indeterminados
+Conforme estudado nesta aula, uma função em Go pode ter um, muitos ou nenhum parâmetro:
+
+package main
+
+import (
+    "fmt"
+)
+
+func SemParametro() string {
+    return "Exemplo de função sem parâmetro!"
+}
+
+func UmParametro(texto string) string {
+    return texto
+}
+
+func DoisParametros(texto string, numero int) (string, int) {
+    return texto, numero
+}
+
+func main() {
+    fmt.Println(SemParametro())
+    fmt.Println(UmParametro("Exemplo de função com um parâmetro"))
+    fmt.Println(DoisParametros("Passando dois parâmetros: essa string e o número", 10))
+}
+COPIAR CÓDIGO
+E nossa saída seria:
+
+
+
+Neste link, você pode executar o código acima.
+
+Porém, é possível que uma função receba um número indeterminado de parâmetros. Funções deste tipo são conhecidas em Go como variadic functions, ou função variádica.
+
+Criando um função variádica
+Para criar uma variadic function, devemos preceder o tipo do argumento com reticências, conforme o exemplo abaixo:
+
+package main
+
+import (
+    "fmt"
+)
+
+func Somando(numeros ...int) int {
+    resultadoDaSoma := 0
+    for _, numero := range numeros {
+        resultadoDaSoma += numero
+    }
+    return resultadoDaSoma
+}
+
+func main() {
+    fmt.Println(Somando(1))
+    fmt.Println(Somando(1,1))
+    fmt.Println(Somando(1,1,1))
+    fmt.Println(Somando(1,1,2,4))
+}COPIAR CÓDIGO
+Neste link, você pode executar o código acima.
+
+Note o uso das reticências na declaração do parâmetro número: numeros ...int. Portanto, podemos criar uma função sem parâmetro, com um, dois, três, ou uma quantidade indeterminada de parâmetros com Go.
+
+https://play.golang.org/p/Kq5ZXTXLVrW
+
+https://en.wikipedia.org/wiki/Variadic_function
+
+https://play.golang.org/p/s-kHUpafjOP
+
+@@06
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito.
+Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@07
+O que aprendemos?
+
+Nessa aula:
+Criamos um nova conta corrente utilizando a palavra new;
+Em seguida, comparamos os tipos criados comparando suas referências e entendemos o que são ponteiros na prática;
+Para finalizar, desenvolvemos o método sacar que verifica se o valor do saque é maior do que zero e se a conta possui saldo.
+Projeto desenvolvido nesta aula
+Neste link, você fará o download do projeto feito até esta aula.
+
+Caso queira visualizar o código desenvolvido até aqui, clique neste link.
+
+Na próxima aula
+Vamos criar um método que possibilita o depósito, outro método para realizar a transferência de dinheiro entre contas e dividir nosso código em pacotes, trabalhando com visibilidade dos campos!
+
+https://github.com/alura-cursos/go_oo/archive/aula2.zip
+
+https://github.com/alura-cursos/go_oo/tree/aula2
 
