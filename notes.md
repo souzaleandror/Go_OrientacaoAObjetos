@@ -942,3 +942,408 @@ https://github.com/alura-cursos/go_oo/archive/aula2.zip
 
 https://github.com/alura-cursos/go_oo/tree/aula2
 
+#### 20/09/2023
+
+@03-Retornos, pacotes e visibilidade
+
+@@01
+Múltiplos retornos
+
+Criamos um método para sacar, que verifica se o valor do saque é maior do que 0 e se ele é maior do que o valor do saldo que um cliente possui na conta.
+Entretanto, podemos sacar no banco, mas ainda não podemos depositar. Criaremos uma função que permita depositar dinheiro na conta. A função Depositar() receberá como parâmetro o valor do depósito, que vamos pegar e atribuir ao saldo.
+
+Portanto, nos parênteses de Depositar() estará valorDoDeposito, do tipo float 64. Se uma outra conta chamar nossa função, devemos apontar para ela, então colocaremos antes da função c apontando para a conta corrente que estiver chamando.
+
+Nossa função pode ser bem simples. Queremos que ela pegue o saldo da conta que estiver chamando c.saldo e atribua o valor do depósito. Usamos o -= para remover o valor do saque do saldo. Agora usaremos += para conceder o valor do depósito.
+
+Já fizemos o teste na função main() com o saque. Agora faremos para Depositar() .
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float 64) {
+    c.saldo += valorDoDeposito
+}
+
+
+func main() {
+    contaDaSilvia := contaContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo) 
+}COPIAR CÓDIGO
+Vamos salvar e executar o código e pressionar "Command + J" para visualizar no terminal. Rodaremos a aplicação com go run main.go e veremos o saldo de "500".
+
+Agora vamos atribuir o valor do depósito. Para isso, no fim do código escreveremos contaDaSilvia.Depositar(). Quando abrimos os parênteses o valorDoDeposito já será solicitado. Vamos depositar mais "500" à conta. Na sequência, faremos um print para exibir novamente o valor do saldo.
+
+fmt.Println(contaDaSilvia.saldo) 
+contaDaSilvia.Depositar(500)
+
+fmt.Println(contaDaSilvia.saldo) COPIAR CÓDIGO
+Mais uma vez vamos limpar o terminal e executar nosso código. Veremos que tínhamos o valor de "500" e após o depósito chegamos em "1000".
+
+Será que teremos problemas com números negativos? Temos "500" de saldo na conta de Silvia. Depositaremos "-1000" para entender o que acontecerá;
+
+contaDaSilvia.Depositar(-1000)
+
+fmt.Println(contaDaSilvia.saldo) COPIAR CÓDIGO
+Agora, ficamos com "-500" de saldo. Tínhamos "500" e pedimos para depositar "-1000". Sendo assim, foram subtraídos os "500" que tínhamos e mais "500", ficando um valor negativo. Não é o que queremos que aconteça.
+
+Precisaremos tratar o valor do depósito fazendo a verificação se esse é um valor maior do que 0. Criaremos um if na função para valorDoDeposito > 0 . Se o valor do depósito for maior do que 0, aí sim atribuiremos o valor do depósito ao saldo.
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float 64) {
+    if valorDoDeposito > 0 {
+        c.saldo += valorDoDeposito
+    }
+}COPIAR CÓDIGO
+Vamos salvar e fazer o teste novamente para o depósito de "-1000". Rodaremos o código e teremos "500" e "500" de saldo impresso, ou seja, ele não se alterou porque nenhum depósito foi efetuado. Mesmo colocando um valor negativo bastante alto, o depósito não ocorrerá
+
+Mas se depositarmos um valor positivo, ele será somado. Por exemplo, se fizermos contaDaSilvia.depositar(1000), o saldo, por fim será "1500".
+
+Mas nossa função de depósito não nos retorna nada, ela simplesmente verifica e já envia os valores, diferentemente da nossa função de saque em que uma mensagem nos informa se ele foi efetuado com sucesso ou não.
+
+Vamos alterar o código adicionando uma string como retorno quando o depósito é realizado. Caso o valor depositado não será maior do 0 e a ação não seja efetuada, a string avisará "Valor depósito menor que zero".
+
+Para mostrar essa mensagem no console, faremos fmt.Println(contaDaSilvia.Depositar(2000)) ao fim. `
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float 64) {
+    if valorDoDeposito > 0 {
+        c.saldo += valordoDeposito
+        return "Deposito realizado com sucesso"
+    } else { 
+        return "Valor do depósito menor que zero"
+    }
+}
+
+
+func main() {
+    contaDaSilvia := contaContaCorrente{}
+    contaDaSilvia.titular = "Silvia"
+    contaDaSilvia.saldo = 500
+
+    fmt.Println(contaDaSilvia.saldo) 
+    fmt.Println(contaDaSilvia.Depositar(2000)) 
+}COPIAR CÓDIGO
+Vamos salvar e executar a função e receberemos a mensagem de que o depósito foi realizado no terminal. Mas além de saber que o depósito foi feito, queremos saber o novo saldo da conta. Será que conseguimos criar uma função que nos devolva mais de um retorno?
+
+Usando Go conseguimos fazer isso se, primeiramente, adicionarmos (string, float64) após (c *ContaCorrente) Depositar(valorDoDeposito float 64). Assim, diremos que nossa função apontará sempre para a ContaCorrente que a chamar, tem um parâmetro do que é o valorDoDeposito e devolverá uma mensagem de string e um float, o saldo. Após as duas mensagens colocaremos, portanto, o c.saldo como retorno também.
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float 64) (string, float 64) {
+    if valorDoDeposito > 0 {
+        c.saldo += valordoDeposito
+        return "Deposito realizado com sucesso", c.saldo
+    } else { 
+        return "Valor do depósito menor que zero", c.saldo
+    }
+}COPIAR CÓDIGO
+Vamos rodar novamente, ainda para o depósito de "2000". Haverá no terminal o saldo inicial de "500", a mensagem de que o depósito foi realizado e na sequência o valor "2500", saldo final após a atribuição do valor.
+
+Assim, aprendemos mais um ponto importante na linguagem Go. Observe que podemos ter um retorno, como quando criamos o saque, nenhum, como quando fizemos pela primeira vez o comportamento de depositar e nada era devolvido, e mais de um retorno como no último caso em que trabalhamos.
+
+Também conseguimos trabalhar com os retornos. Por exemplo, criaremos uma variável chamada status e outra chamada valor. Atribuiremos nessa variável o resultado desse depósito.
+
+O que fizemos foi: como chamamos essa função, ela nos devolverá dois itens. Então, o primeiro retorno dela, uma mensagem string, será atribuída ao status . O segundo, o novo saldo, caso seja realizado com sucesso vai para a segunda variável, valor.
+
+Sendo assim, printaremos as duas variáveis.
+
+fmt.Println(contaDaSilvia.saldo) 
+status, valor := contaDaSilvia.Depositar(2000)
+fmt.Println(status, valor) COPIAR CÓDIGO
+Vamos salvar e executar o programa. Teremos ainda o mesmo resultado. Podemos ter uma função com mais de um retorno e trabalhar esses retornos de forma individual também.
+
+@@02
+Transferência entre contas
+
+Com base no que desenvolvemos até aqui podemos sacar ou depositar numa conta corrente. Mas o banco digital para o qual trabalhamos também permitirá transferir dinheiro entre contas.
+Criaremos um cenário na função main() com contaDaSilvia e contaDoGustavo. Elas serão do tipo ContaCorrente, os nomes dos titulares estarão entre aspas duplas e o saldo de "Silvia" será "300". O de "Gustavo", "100".
+
+Vamos visualizar ambas as contas no terminal também.
+
+func main() {
+    contaDaSilvia := ContaCorrente{titular:"Silvia", saldo: 300}
+    contaDoGustavo := ContaCorrente{titular:"Gustavo", saldo: 100}
+
+    fmt.Pirintln(contaDaSilvia)
+    fmt.Pirintln(contaDoGustavo)COPIAR CÓDIGO
+Vamos salvar e executar esse código com go run main.go. Teremos no console {Silvia 0 0 300} e {Gustavo 0 0 100}, ou seja, as informações sobre o titular e o saldo das contas.
+
+Queremos possibilitar a transferência entre as duas contas Para isso, criaremos uma função chamada Transferir() e ela terá um parâmetro. Com base no que já fizemos, quando queríamos sacar, criamos a variável valorDoSaque. Para depositar, valorDoDeposito. Agora vamos gerar valorDaTransferencia, que será do tipo float64.
+
+Para que uma transferência aconteça precisamos informar que estamos tirando o valor de uma conta e enviando para outra. Criaremos um tipo contaDestino. Na linguagem Go, nós especificamos os tipos dos nossos parâmetros. Pensando na struct que fizemos anteriormente, colocamos a palavra type. Assim, a própria ContaCorrente é um tipo.
+
+Então, podemos dizer que a contaDestino é do tipo ContaCorrente. Além disso, criaremos um parâmetro booleano que servirá como retorno para essa função, dizendo se é verdadeiro ou falso.
+
+Dentro do corpo da função, teremos que verificar se a conta a partir da qual faremos a transferência tem saldo. Se Silvia quiser transferir para Gustavo, por exemplo, precisaremos verificar se a conta dela tem saldo para isso. Colocaremos antes da função um ponteiro para a ContaCorrente que chamará essa função. Faremos um if colocando a condição de que se o valorDaTransferencia for menor do que o saldo da conta chamando, será possível fazer a transferência
+
+Primeiro será necessário remover dinheiro da conta que transferirá. Para isso, vamos tirar do c.saldo o valorDaTransferencia. Depois, vamos ter que enviar o dinheiro para a outra conta, o que será um processo semelhante ao de depositar. Assim, usaremos Depositar como um método para contaDestino receber o valor transferido.
+
+Isso ainda não será suficiente, pois falta informar o retorno booleano. Portanto, se o procedimento acontecer, retornaremos true, ou seja, o retorno da transferência é verdadeiro.
+
+Caso não aconteça, faremos um else para retornar um false
+
+func (c *ContaCorrente) Transferir(valorDaTransferencia float64, contaDestino ContaCorrente) bool {
+    if valorDaTransferencia < c.saldo {
+        c.saldo -= valorDaTransferencia 
+        contaDestino.Depositar(valorDaTransferencia)
+        return true
+    } else {
+        return false
+    }
+}COPIAR CÓDIGO
+Vamos salvar e aparentemente não há problemas, então vamos testar. Sabemos que o saldo de contaDaSilvia é "300" e de contaDoGustavo é "100". Para armazenar o resultado, criaremos uma variável chamada status e faremos a transferência a partir de contaDaSilvia. Colocaremos o valor "200" nos parâmetros de Transferir() , e no segundo parâmetro, o destino, contaDoGustavo.
+
+Se apenas salvarmos a aplicação agora, será avisado que a variável status foi declarada mas não foi utilizada. Então vamos exibi-lo no print e abaixo o conteúdo das duas contas.
+
+status := contaDaSilvia.Transferir(200, contaDoGustavo)
+
+fmt.Println(status)
+fmt.Pirintln(contaDaSilvia)
+fmt.Pirintln(contaDoGustavo)COPIAR CÓDIGO
+Vamos executa o código e veremos no terminal que a transferência aconteceu. A conta da Silvia, anteriormente com saldo de "300", após tranferir "200" para Gustavo está com "100".
+
+A conta do Gustavo tinha "100" de saldo. Silvia fez a transferência de "200" para a conta dele, mas ainda aparecerá no console que o saldo dele é "100". Ou seja, algo está errado. O que será que aconteceu?
+
+O valor da conta da Silvia foi retirado, mas o conteúdo não entrou na conta de destino. O erro aconteceu porque fizemos referência para contaDaSilvia, apontamos para o conteúdo da conta que chama a função para alterar o conteúdo dela, mas não fizemos o mesmo para contaDestino.
+
+Como queremos alterar o valor dessa conta também, colocamos um asterisco na frente dela nos parâmetros da função.
+
+func (c *ContaCorrente) Transferir(valorDaTransferencia float64, contaDestino *ContaCorrente) bool {
+    if valorDaTransferencia < c.saldo {
+        c.saldo -= valorDaTransferencia 
+        contaDestino.Depositar(valorDaTransferencia)
+        return true
+    } else {
+        return false
+    }
+}COPIAR CÓDIGO
+Porém, se salvarmos essa alteração, será apresentado um erro, e o alerta nos dirá que estamos apontando para um local desconhecido. Precisamos identificar contaDoGustavo. Conseguimos fazer isso colocando um & quando fizermos a transferência. Assim, dizemos que queremos transferir de fato para esse endereço além de termos apontado para a conta.
+
+status := contaDaSilvia.Transferir(200, &contaDoGustavo)COPIAR CÓDIGO
+Faremos um teste, pressionaremos "Ctrl + L" e executaremos. Agora sim, a conta de Silvia que tinha "300" como saldo passará a ter "100" e a de Gustavo, "300", pois recebeu "200".
+
+Vamos fazer o contrário, pegar a contaDoGustavo e transferir "200" para Silvia, levando em conta que ele não tem saldo suficiente para isso, pois o saldo dele é "100".
+
+status := contaDoGustavo.Transferir(200, &contaDaSilvia)COPIAR CÓDIGO
+Veremos no console a mensagem de falso para a transferência, ela não aconteceu, e os saldos das contas permanecerão os mesmos.
+
+Vamos ver o que acontecerá se Gustavo tentar transferir "-200" para a conta de Silvia.
+
+status := contaDoGustavo.Transferir(-200, &contaDaSilvia)COPIAR CÓDIGO
+Vamos pressionar "Ctrl + L", executar e veremos a mensagem "true", de que foi verdadeiro. A conta de Silvia continuará com "300", mas a de Gustavo também terá "300". Esse é um comportamento que não esperávamos.
+
+Isso significa que alem de verificar se o valor da transferência é menor do que o valor do saldo, verificaremos também se o valor da transferência é maior do que 0. As duas condições precisam ocorrer simultaneamente para que a transferência ocorra e isso seja verdade.
+
+func (c *ContaCorrente) Transferir(valorDaTransferencia float64, contaDestino *ContaCorrente) bool {
+    if valorDaTransferencia < c.saldo && valorDaTransferencia > 0 {
+        c.saldo -= valorDaTransferencia 
+        contaDestino.Depositar(valorDaTransferencia)
+        return true
+    } else {
+        return false
+    }
+}COPIAR CÓDIGO
+Vamos salvar, limpar o terminal e executar e dessa vez a transferência não aconteceu, pois o resultado será falso e o saldo das contas permanecerá o mesmo do início, "300" para Silvia e "100" para Gustavo.
+
+@@03
+Pacotes e visibilidade
+
+Até esse momento do curso, nosso código conta com 50 linhas. A medida que novas funcionalidades são implementadas, mais linhas de código surgem e pode se tornar mais difícil a manutenção dele.
+É importante lembrar que não desenvolvemos um código só para nós entendermos, outros desenvolvedores também precisam entendê-lo para poder trabalhar nele. Por isso devemos mantê-lo de uma maneira simplificada.
+
+Mas como podemos torná-lo mais organizado sem alterar todo o conteúdo e os comportamentos que já criamos?
+
+Para isso, podemos utilizar uma convenção do Go que se trata da distribuição do nosso código em pacotes. Vamos lembrar que o primeiro comando utilizado no Go é informar qual é o pacote que utilizamos, package main.
+
+Então, podemos criar um pacote de contas e colocar nele os trechos referentes às Contas Correntes. Caso surjam ainda outras contas, como a Poupança, elas também serão inseridas no pacote.
+
+Clicaremos no primeiro link da barra na lateral esquerda do Visual Studio Code, o botão "Explorer" ou "Ctrl + Shift + E". Todo nosso código estará nesse local. Criaremos uma pasta chamada "contas" nessa área, e dentro dela criaremos um "New file" (novo arquivo) chamado "contaCorrente.go", porque manteremos aqui somente os códigos de conta corrente.
+
+Nesse arquivo, usaremos o comando package contas. Todo nosso conteúdo de conta corrente deverá ficar dentro desse pacote. Por isso vamos usar "Ctrl + X" para trazer os trechos do código necessários para dentro do projeto.
+
+package contas
+
+type ContaCorrente struct {
+    titular       string
+    numeroAgencia int
+    numeroConta   int
+    saldo         float64
+}
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float64) (string, float64) {
+    if valorDoDeposito > 0 {
+        c.saldo += valorDoDeposito
+        return "Deposito realizado com sucesso", c.saldo
+    } else {
+        return "Valor do deposito menor que zero", c.saldo
+    }
+}
+
+func (c *ContaCorrente) Tranferir(valorDaTransferencia float64, contaDestino *ContaCorrente) bool {
+    if valorDaTransferencia < c.saldo && valorDaTransferencia > 0 {
+        c.saldo -= valorDaTransferencia
+        contaDestino.Depositar(valorDaTransferencia)
+        return true
+    } else {
+        return false
+    }
+}COPIAR CÓDIGO
+Vamos salvar e não teremos nenhum problema. Vamos voltar ao main e tentaremos salvar também, porém ele apresentará uma mensagem derro que diz que ContaCorrente está indefinida. Colocamos ContaCorrente no nosso pacote de contas, então precisamos avisar para o main em que local ele pode encontrar a informação.
+
+Na nossa primeira linha de main.go fazemos o import de uma classe para conseguirmos visualizar a saída do nosso desenvolvimento no terminal, o pacote "fmt". Faremos outro import colocando parênteses e todos os imports dentro deles.
+
+Podemos descobrir o caminho para nosso pacote de contas no terminal. Vamos limpar nosso terminal e depois digitaremos pwd. Aparecerá no console todo o caminho das pastas do sistema até onde estarão os pacotes. No nosso caso, poderemos copiar a partir de github.com/alura/banco. Entretanto, se digitarmos só até "bancos", ele não entrará na pasta contas, por isso estenderemos o caminho até ela.
+
+package main
+
+import (
+    "fmt"
+    "github.com/alura/banco/contas"
+)COPIAR CÓDIGO
+Porém se se salvarmos, o caminho que digitamos sumirá. Isso acontece porque trouxemos o pacote de contas, mas ainda não dissemos qual informação contida nele foi utilizada no arquivo em que estamos trabalhando. Para identificar que a ContaCorrente em main.go é a mesma de contas.go , precisamos dizer de onde ContaCorrente veio, escrevendo contas. antes de utilizá-la.
+
+package main
+
+import (
+    "fmt"
+
+    "github.com/alura/banco/contas"
+)
+
+func main() {
+    contaDaSilvia := contas.ContaCorrente{titular: "Silvia", saldo: 300}
+    contaDoGustavo := contas.ContaCorrente{titular: "Gustavo", saldo: 100}
+
+    status := contaDoGustavo.Tranferir(-200, &contaDaSilvia)
+
+    fmt.Println(status)
+    fmt.Println(contaDaSilvia)
+    fmt.Println(contaDoGustavo)
+}COPIAR CÓDIGO
+Agora vamos salvar e nosso código estará correto nesse ponto. Mas ainda haverá um outro erro. Ele está nos alertando de que não sabe o que é o campo titular nem o saldo por questões de visibilidade.
+
+Visibilidade é um atributo referente a uma função ou variável referente a ser visível por outras partes da aplicação, como os pacotes, de forma muito semelhante ao private ou public do Java.
+
+Não temos nenhum erro no nosso código de contas. Nele, deixamos todas as primeiras letras dos nossos campos em minúsculas. Com isso, tornamos eles visíveis apenas por esse arquivo.
+
+Importante!: Na linguagem Go, se escrevermos nomes de variáveis deixando a primeira letra minúscula, elas ficarão visíveis apenas no arquivo em que foram declaradas.
+Para alterar a visibilidade dos campos, alteraremos todas as primeiras letras dos nomes para maiúsculas, tanto nas declarações quanto nos trechos em que titular e saldo são utilizados.
+
+Para encontrar as palavras em todos os pontos do código, é possível pressionar "Ctrl + F" e procurá-las para então fazer a substituição. Após encontrar os termos, clicaremos na seta à direita da janela de busca e o campo "Replace" será aberto. Nele escreveremos a forma para a qual queremos alterar, por exemplo, buscando por "saldo", escreveremos "Saldo". Faremos essa modificação para todas as vezes que as palavras aparecem clicando no ícone "Replace all".
+
+package contas
+
+type ContaCorrente struct {
+    Titular       string
+    NumeroAgencia int
+    NumeroConta   int
+    Saldo         float64
+}
+
+func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque > 0 && valorDoSaque <= c.Saldo
+    if podeSacar {
+        c.Saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "Saldo insuficiente"
+    }
+}
+
+func (c *ContaCorrente) Depositar(valorDoDeposito float64) (string, float64) {
+    if valorDoDeposito > 0 {
+        c.Saldo += valorDoDeposito
+        return "Deposito realizado com sucesso", c.Saldo
+    } else {
+        return "Valor do deposito menor que zero", c.Saldo
+    }
+}
+
+func (c *ContaCorrente) Tranferir(valorDaTransferencia float64, contaDestino *ContaCorrente) bool {
+    if valorDaTransferencia < c.Saldo && valorDaTransferencia > 0 {
+        c.Saldo -= valorDaTransferencia
+        contaDestino.Depositar(valorDaTransferencia)
+        return true
+    } else {
+        return false
+    }
+}COPIAR CÓDIGO
+Então colocamos todos os códigos referentes a Conta Corrente, a struct e todos os nossos métodos num pacote de contas e caso outras contas apareçam, elas podem ser colocadas na mesma pasta, seja por quem precisar modificar a aplicação. Se for necessário usar uma nova conta adicionada, a prática será fazer um import dela também.
+
+Também podemos dar um outro nome para nosso import, Por exemplo, escrevendo uma letra "c" antes de passar o caminho, c será entendido como um apelido.
+
+import (
+    "fmt"
+
+    c "github.com/alura/banco/contas"
+)
+COPIAR CÓDIGO
+Assim, quando formos escrever o pacote de onde vem uma informação, podemos utilizar só o c antes do nome do tipo, na nossa situação.
+
+contaDaSilvia := c.ContaCorrente{titular: "Silvia", saldo: 300}COPIAR CÓDIGO
+Se salvarmos, teremos o mesmo resultado. Mas manteremos a escrita contas.ContaCorrente para não confundir. Agora já sabemos que podemos dar apelidos aos nossos mports.
+
+@@04
+Retornos e pacotes do Go
+
+Nesta aula, criamos a função Depositar que, quando invocada, nos retorna uma mensagem e o valor do nosso saldo. Além disso, modularizamos nosso código criando um pacote para manter os diferentes tipos de conta.
+Sabendo disso, analise as afirmações abaixo e marque as verdadeiras.
+
+Alternativa correta
+Todo pacote deve ter um arquivo chamado main.go.
+ 
+Alternativa correta
+Uma função em Go é uma parte de código que realiza uma determinada ação, e pode ter um, muitos ou nenhum retorno.
+ 
+Certo! Uma boa função realiza uma única ação e pode ter muitos retornos ou nenhum.
+Alternativa correta
+Visibilidade é o atributo de uma função ou variável a ser visível para diferentes partes do programa
+ 
+Certo! Semelhante ao public ou private do java, podemos deixar uma campo ou função pública ou privada para outras partes da aplicação.
+Alternativa correta
+Para tonar um campo ou função pública ou privada para outras partes da aplicação, alteramos a primeira letra para minúscula ou maiúscula respectivamente.
+
+@@05
+Para saber mais
+
+Executando um projeto localmente
+Quando realizamos o download de um projeto Go, antes de executar o código, um passo importante é necessário:
+
+Exibindo o código main do github destacando o nome do usuário gopath
+
+Alterando nome do caminho das importações
+Observe que o nome do caminho da importação é alura. Para executar a aplicação em sua máquina, altere adicionando o seu nome de usuário de sistema.
+
+@@06
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito.
+Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@07
+O que aprendemos?
+
+Nessa aula:
+Criamos um método chamado depositar, que quando invocado nos retorna uma mensagem (string) e o valor do novo saldo (float64);
+Em seguida, criamos o método transferir, que tira um valor de uma conta e transfere para uma conta destino reutilizando o método depositar;
+Para finalizar, criamos um pacote chamado contas e criamos um arquivo chamado contaCorrente.go para manter todo código referente a este tipo de conta.
+Projeto desenvolvido nesta aula
+Neste link, você fará o download do projeto feito até esta aula.
+
+Caso queira visualizar o código desenvolvido até aqui, clique neste link.
+
+Na próxima aula
+Vamos aprender como podemos criar composição com Go, aninhando duas structs e encapsulando o campo saldo, alterando sua visibilidade!
+
+https://github.com/alura-cursos/go_oo/archive/aula3.zip
+
+https://github.com/alura-cursos/go_oo/tree/aula3
