@@ -1347,3 +1347,287 @@ Vamos aprender como podemos criar composição com Go, aninhando duas structs e 
 https://github.com/alura-cursos/go_oo/archive/aula3.zip
 
 https://github.com/alura-cursos/go_oo/tree/aula3
+
+#### 21/09/2023
+
+@04-Composição e encapsulamento
+
+@@01
+Composição de structs
+
+Criamos a struct de Conta Corrente com alguns métodos como Sacar(), Depositar() e Transferir().
+Mas existe um ponto importante para o qual ainda não demos muita atenção, o Titular. A string com o nome é a única informação que temos sobre a pessoa responsável por manter essa conta corrente. Precisamos de mais informações.
+
+Poderíamos criar as variáveis TitularCPF, e TitularProfissao, ambas do tipo string. Mas seria um problema definir várias características de um titular em ContaCorrente. Nosso banco é digital, outros tipos de contas aparecerão e haverá outros titulares para outros tipos de contas.
+
+Então, estaríamos passando a responsabilidade de manter um titular de uma conta para ContaCorrente, uma função que não deve ser dela. Pensando nisso, criaremos uma nova struct para manter os titulares de contas. Usaremos os mesmos campos, mas assim conseguiremos um código mais organizado e bem dividido de acordo com responsabilidades.
+
+Criaremos um novo folder ou pasta chamada "clientes". No pacote "clientes", criaremos um novo arquivo, "cliente.go". Diremos que esse arquivo pertence ao package clientes e vamos declarar a nova struct com type Titular struct.
+
+Já sabemos que Titular terá um Nome, CPF e Profissao do tipo string. Já deixamos a visibilidade dos campos acessível para outras partes do código.
+
+package clientes
+
+type Titular struct {
+    Nome   string
+    CPF    string
+    Profissao string
+}COPIAR CÓDIGO
+Agora vamos na contaCorrente e no lugar de dizer que Titular é uma string, diremos que ele é do tipo Titular. Porém, esse tipo virá de outro pacote. Por isso será necessária a importação. Digitaremos pwd no terminal para ganhar tempo encontrando o caminho para a pasta onde está o arquivo e copiar de "github" em diante.
+
+package contas
+
+import "github.com/alura/banco/clientes"
+
+type ContaCorrente struct {
+    Titular        clientes.Titular
+    NumeroAgencia  int
+    NumeroConta    int
+    Saldo          float64
+}COPIAR CÓDIGO
+Vamos salvar e não haverá nenhuma mensagem de erro. Dessa forma, criamos uma struct de Titular em "cliente.go" e em "contaCorrente.go" teremos outro tipo com a struct Titular dentro dele, com Titular clientes.Titular. Colocamos um tipo sobre outro tipo, o que chamamos de composição na linguagem Go. Em vez de uma herança, temos uma composição de structs.
+
+A seguir veremos mais sobre como fazer essa composição, já que agora estamos usando duas estruturas, a struct de clientes e a de conta corrente.
+
+@@02
+Tipos aninhados
+
+Criamos a struct de Titular no pacote de clientes e indicamos na ContaCorrente do pacote de contas que um Titular pertencerá a um outro tipo que geramos, o tipo Titular.
+Agora queremos criar uma ContaCorrente e utilizar as duas estruturas que já criamos. Para isso, removeremos contaDaSilvia e contaDoGustavo que usamos em exemplos anteriores e criaremos uma nova conta em "main.go", contaDoBruno.
+
+Essa conta virá do pacote de "contas" e será do tipo ContaCorrente. O primeiro campo dessa nossa estrutura de conta é o Titular, então escreveremos isso e precisaremos indicar que que ele vem do pacote de "clientes". Mas como faremos isso se não temos o titular?
+
+Será necessário importar também o pacote "clientes" e faremos a indicação Titular: cliente.Titular.
+
+Esse Titular terá um Nome, "Bruno", e um CPF, também do tipo string, que será "123.111.123.12". Por fim, ele também terá uma Profissao, "Desenvolvedor".
+
+Após a primeira estrutura referente a Titular, colocaremos a primeira chave fechando o conteúdo desses campos e uma vírgula. Então, acrescentaremos os campos restantes que serão relacionados à ContaCorrente em vez de Titular.
+
+O NumeroAgencia será 123, NumeroConta 123456 e por fim, o Saldo de 100.
+
+Criaremos um print para visualizar essa conta.
+
+import (
+    "fmt"
+
+    "github.com/alura/banco/contas"
+    "github.com/alura/banco/clientes"
+
+)
+
+func main() {
+    contaDoBruno := contas.ContaCorrente{Titular: clientes.Titular{
+        Nome: "Bruno",
+        CPF: "123.111.123.12"
+        Profissao: "Desenvolvedor"},
+        NumeroAgencia:123, NumeroConta: 123456, Saldo:100}
+
+    fmt.Println(contaDoBruno)
+}COPIAR CÓDIGO
+Vamos salvar e rodar o código com go run main.go no terminal. No momento em que executamos, veremos duas chaves. A primeira chave será referente à ContaCorrente e a seguinte ao Titular, porque ele trata de duas estruturas diferentes.
+
+{{Bruno 123.111.123.12 Desenvolvedor} 123.123456 100}
+Agora, se colocarmos o cursor do mouse sobre a ContaCorrente ou do Titular, visualizamos os campos e os títulos.
+
+Para que a compreensão do nosso código seja facilitada podemos criar primeiro o cliente "Bruno" e depois a conta dele.
+
+Faremos o mesmo processo, mas no lugar de criar contaDoBruno, criaremos o clienteBruno que será dois pontos igual (:=) clientes.Titular{}, sendo Titular o nosso tipo. Teremos os campos de nome, CPF e profissão e passaremos o conteúdo entre as chaves.
+
+Criado o cliente, agora criaremos a conta, contaDoBruno. Ela será do tipo ConteCorrente do pacote de "contas". Dentro das chaves, colocaremos o conteúdo dos campos. clienteBruno, 123, 123456, 100
+
+func main() {
+    clienteBruno := clientes.Titular{"Bruno", "123.123.123.12", "Desenvolvedor"}
+    contaDoBruno := contas.ContaCorrente{clienteBruno, 123, 123456, 100}
+    fmt.Println(contaDoBruno)
+}COPIAR CÓDIGO
+Vamos salvar e não veremos nenhuma mensagem de erro. Teremos exatamente o mesmo resultado no console:
+
+{{Bruno 123.111.123.12 Desenvolvedor} 123.123456 100}
+Porém, agora nosso código ficou muito mais legível para conseguirmos identificar e criar nossas estruturas.
+
+@@03
+Alterando a visibilidade
+
+Para realizar um saque, transferência ou um depósito, verificamos se o saldo ou o valor do depósito são maiores do que 0. Essa solução está funcionando.
+Mesmo assim, por conta da visibilidade, deixamos passar um ponto importante no nosso código. Na função main(), deletaremos as linhas de código escritas anteriormente e faremos uma contaExemplo. Ela será do tipo ContaCorrente do pacote de contas.
+
+Depois, atribuiremos um saldo a essa conta, o valor "-100", negativo. Vamos exibir essa conta para a visualização no console.
+
+func main() (
+    contaExemplo := contas.ContaCorrente{}
+    contaExemplo.saldo = -100
+
+    fmt.Println(contaExemplo)
+}COPIAR CÓDIGO
+Vamos salvar e visualizaremos os campos de Titular, Número da Agência e Número da Conta vazios, porque só atribuímos valor ao Saldo, "-100".
+
+{{ } 0 0 -100}
+Então nos preocupamos em não deixar a pessoa sacar. transferir ou depositar valore menores do que 0, mas ainda assim deixamos passar a possibilidade de atribuir um valor negativo ao saldo.
+
+Mas por que isso acontece? Já alteramos a visibilidade, deixando a primeira letra de todos os nossos campos em maiúsculas. Qualquer parte do nosso projeto que fizer a importação do pacote de "contas" conseguirá manipular o saldo. Não é o que desejamos.
+
+Queremos que a pessoa consiga ver quanto tem de saldo e ao mesmo tempo não queremos que nosso programa permita a atribuição de um valor negativo. Por isso, tornaremos o saldo privado, visível apenas para o pacote de "contas". Deixaremos a primeira letra dele minúscula.
+
+type ContaCorrente struct {
+    Titular        clientes.Titular
+    NumeroAgencia  int
+    NUmeroConta    int
+    saldo          float 64
+}COPIAR CÓDIGO
+Vamos salvar e perceberemos que o programa mostrará o sublinhado vermelho indicando erros em todos os pontos do código em que Saldo esteja escrito assim, com a primeira letra maiúscula.
+
+Pressionaremos "Ctrl+ F" no teclado, escreveremos "Saldo" e clicaremos na seta ao lado da janela de substituição, para escrever "saldo" no campo que se abrirá. Pediremos para a palavra ser substituída toda vez que aparecer clicando no ícone do botão "Replace All". Salvaremos e não haverá mais nenhum erro. Assim, deixamos o saldo visível apenas para ContaCorrente.
+
+Se tentarmos executar de novo o código que fizemos anteriormente e deixamos como exemplo em "main.go", não conseguiremos. Aparecerá no console que Saldo não foi definido porque não temos acesso a essa variável.
+
+Então estaremos diante de dois desafios. O primeiro será como atribuir um valor para a contaExemplo. Podemos fazer um depósito, e já há uma função com esse objetivo. Vamos chamar a função para a conta com contaExemplo.Depositar() e nos parâmetros passaremos o valor "-100".
+
+func main() (
+    contaExemplo := contas.ContaCorrente{}
+    contaExemplo.Depositar(-100)
+
+    fmt.Println(contaExemplo)
+}COPIAR CÓDIGO
+Vamos salvar e executar nosso código. No terminal estaremos com 0 em todos os campos porque foi realizada a verificação na função e o valor do depósito era menor do que 0. Não conseguimos depositar um valor negativo conforme o esperado. Se tirarmos o sinal de menos e deixarmos o depósito como de "100", um valor positivo, ele será efetuado e conseguiremos visualizar "100" no console ao executar.
+
+Outra funcionalidade com a qual precisamos nos preocupar é que as pessoas que tem uma conta corrente devem poder ter acesso ao valor do saldo delas. Precisamos pensar numa forma de obter esse valor de saldo. Para resolver esse problema podemos criar outra função que aponta para a conta corrente que está chamando e aponta o valor do saldo dela.
+
+Chamaremos a função de ObterSaldo() e ela apontará para a conta sendo invocada por meio de (c *ContaCorrente) vindo antes da função. Retornaremos um valor float64 . Dentro do corpo da função o return será c.saldo, ou seja, visualizaremos o saldo da conta que chamou a função.
+
+func (c *ContaCorrente) ObterSaldo() float64 {
+    return c.saldo
+}COPIAR CÓDIGO
+Salvaremos e agora vamos para a função main() para visualizar apenas o valor do saldo. Vamos passar a função para obter o saldo na impressão.
+
+func main() (
+    contaExemplo := contas.ContaCorrente{}
+    contaExemplo.Depositar(100)
+
+    fmt.Println(contaExemplo.ObterSaldo())
+}COPIAR CÓDIGO
+Mais uma vez vamos salvar o código, limparemos o terminal e executaremos mais uma vez. Veremos apenas o saldo de "100".
+
+Dessa forma, reutilizamos um código que já tínhamos anteriormente, o de Depositar(), reconhecemos uma vulnerabilidade dele, por ter permitido que depositássemos um valor negativo, e assim criamos uma forma de obter o valor do saldo.
+
+@@04
+Go e orientação a objetos
+
+Criar tipos customizados é uma ferramenta de abstração muito poderosa em linguagens de programação.
+Comparada à linguagens puramente orientadas a objetos, Go tem um suporte limitado às características deste paradigma.
+
+Sabendo disso, analise e marque as afirmações verdadeiras.
+
+Não é possível encapsular tipos, campos ou funções em Go. Tudo é visível para qualquer parte da aplicação.
+ 
+Alternativa correta
+Composição de tipos é suportada em Go.
+ 
+Certo! Composição de tipos é suportada e encorajada em Go.
+Alternativa correta
+A linguagem Go possui herança.
+ 
+Alternativa correta
+A linguagem Go não possui o conceito de classe.
+ 
+Certo! Em Go, definimos estruturas de dados em forma de structs.
+
+@@05
+Para saber mais
+
+Passando um valor ou uma cópia
+Métodos são definidos de maneira parecida com funções, mas de uma maneira diferente. Existe um (p *Pessoa) que se refere a um ponteiro para a instância criada da estrutura, conforme o exemplo abaixo:
+
+package main
+
+import (
+    "fmt"
+)
+
+type Pessoa struct {
+    nome, sobrenome string
+}
+
+func (p *Pessoa) ExibirNomeCompleto() string {
+    nomeCompleto := p.nome + " " + p.sobrenome
+    return nomeCompleto
+}
+
+func main() {
+    p1 := Pessoa{"Guilherme", "Lima"}
+    fmt.Println(p1.ExibirNomeCompleto())
+}COPIAR CÓDIGO
+Neste link, você pode executar o código acima
+
+Ao executar este código, temos a saída esperada:
+
+
+
+Nesse caso, passamos para o método o valor encontrado neste ponteiro através do (p *Pessoa).
+
+Passando uma cópia
+Também é possível passar um valor removendo a assinatura do ponteiro (p *Pessoa) para (p Pessoa).
+
+Nesse caso, uma cópia do valor de Pessoa é passada para a função, sem alterar o valor do ponteiro. Portanto, precisamos ficar atentos, já que qualquer alteração que você faça em p se passar por valor não será refletida na fonte p.
+
+Observe este exemplo:
+
+package main
+
+import (
+    "fmt"
+)
+
+type Pessoa struct {
+    nome, sobrenome string
+}
+
+func (p Pessoa) ExibirNomeCompleto() string {
+    p.sobrenome = "Silva"
+    nomeCompleto := p.nome + " " + p.sobrenome
+    return nomeCompleto
+}
+
+func main() {
+    p1 := Pessoa{"Guilherme", "Lima"}
+
+    fmt.Println(p1.ExibirNomeCompleto())
+    fmt.Println(p1.nome, p1.sobrenome)
+}COPIAR CÓDIGO
+Neste link, você pode executar o código acima
+
+Nossa saída será:
+
+
+
+Observe que alteramos o sobrenome de p no método ExibirNomeCompleto, mas não foi alterado o valor armazenado no ponteiro. Sendo assim, quando não precisamos alterar o conteúdo de um ponteiro, podemos passar apenas uma cópia.
+
+https://play.golang.org/p/m1yagmicHND
+
+https://play.golang.org/p/GVfCcf3ag53
+
+@@06
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito.
+Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@07
+O que aprendemos?
+
+Nessa aula:
+Criamos um novo pacote chamado clientes e um arquivo chamado clientes.go, onde desenvolvemos uma nova struct chamada Titular com nome, CPF e profissão;
+Em seguida, alteramos o campo titular da struct contaCorrente para ser do tipo da struct Titular;
+Para finalizar, alteramos a visibilidade do campo saldo e criamos um método chamado obterSaldo.
+Projeto desenvolvido nesta aula
+Neste link, você fará o download do projeto feito até esta aula.
+
+Caso queira visualizar o código desenvolvido até aqui, clique neste link.
+
+Na próxima aula
+Vamos criar um novo tipo de conta e possibilitar o pagamento de boleto com ambas as contas utilizando uma interface!
+
+https://github.com/alura-cursos/go_oo/archive/aula4.zip
+
+https://github.com/alura-cursos/go_oo/tree/aula4
