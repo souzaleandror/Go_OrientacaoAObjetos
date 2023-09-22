@@ -1631,3 +1631,214 @@ Vamos criar um novo tipo de conta e possibilitar o pagamento de boleto com ambas
 https://github.com/alura-cursos/go_oo/archive/aula4.zip
 
 https://github.com/alura-cursos/go_oo/tree/aula4
+
+#### 22/09/2023
+
+@05-Interface e novo tipo de conta
+
+@@01
+Conta poupança
+
+Criamos a Conta Corrente, mas surgirá um novo serviço no nosso banco digital, a Conta Poupança.
+Ela terá comportamentos semelhantes à Conta Corrente. Será possível sacar e depositar dinheiro inicialmente.
+
+Para começar nossa criação, clicaremos no ícone para explorar nosso projeto. Na nossa pasta "contas" clicaremos na opção "New file" para criar o novo arquivo, "contaPoupanca.go".
+
+Vamos especificar nosso pacote, package contas no código. A estrutura da Conta Pouoança será parecida com o que já fizemos anteriormente. Usaremos a palavra type para criar ContaCorrente como um tipo. Ela será uma struct , da mesma forma que nossa ContaCorrente .
+
+Teremos um Titular, e deixaremos a visibilidade dele aberta para outras partes do projeto que o importarem. O Titular virá do nosso pacote de clientes, por isso também faremos esse import. Sendo assim, ele será do tipo clientes .
+
+Além disso, teremos o NumeroAgencia, NumeroConta e um novo campo, Operacao, todos do tipo inteiro. O saldo será um float64.
+
+package contas
+
+import "github.com/alura/banco/clientes"
+
+type ContaPoupanca struct {
+    Titular       clientes.Titular
+    NumeroAgencia int
+    NumeroConta   int
+    Operacao      int
+    saldo         float64
+}COPIAR CÓDIGO
+Então, salvaremos o código e já teremos nossa Conta Poupança. Mas uma informação interessante é que quando vamos declarar algumas variáveis no Go, assim como em algumas outras linguagens, podemos escrever isso de uma outra forma.
+
+Escreveremos Titular e seu tipo na primeira linha. Na sequência, NumeroConta, NumeroAgencia e Operacao virão separados por vírgula e tipados como int, pois todos são inteiros. Assim podemos evitar de repetir o int para todos.
+
+type ContaCorrente struct {
+    Titular       clientes.Titular
+    NumeroAgencia, NumeroConta, Operacao int
+    saldo         float64
+}COPIAR CÓDIGO
+Vamos salvar e ainda teremos o mesmo comportamento e podemos fazer o mesmo para todas as outras Contas, incluindo "clientes".
+
+Em "cliente.go" todos os nossos campos serão strings, então colocaremos o nome, CPF e a profissão na mesma linha. Não será mais necessário especificar o tipo de um por um.
+
+type Titular struct {
+    Nome CPF, Profissao string
+}COPIAR CÓDIGO
+Agora faremos o mesmo processo em "ContaCorrente.go". NumeroConta e NumeroAgencia serão do mesmo tipo int e poderão ser tipados juntamente, separados por vírgula.
+
+type ContaCorrente struct {
+    Titular                     clientes.Titular
+    NumeroAgencia, NumeroConta  int
+    saldo                       float 64
+}COPIAR CÓDIGO
+Teremos o mesmo resultado e nossa leitura ficará mais clara.
+
+Além disso, a ContaPoupanca será capaz de sacar e depositar dinheiro. Por isso, copiaremos os métodos já existentes em "ContaCorrente.go" e copiaremos para nosso arquivo atual, "ContaPoupanca.go".
+
+No entanto, no momento que salvarmos, veremos uma mensagem estranha dizendo que ContaCorrente já foi redeclarada anteriormente. No momento em que fizemos a cópia, não alteramos o ponteiro. Precisamos alterá-lo para que aponte para ContaPoupanca também.
+
+func (c *ContaPoupanca) Sacar(valorDoSaque float64) string {
+    podeSacar := valorDoSaque > 0 && valorDoSaque <= c.saldo
+    if podeSacar {
+        c.saldo -= valorDoSaque
+        return "Saque realizado com sucesso"
+    } else {
+        return "saldo insuficiente"
+    }
+}
+
+func (c *ContaPoupanca) Depositar(valorDoDeposito float64) (string, float64) {
+    if valorDoDeposito > 0 {
+        c.saldo += valorDoDeposito
+        return "Deposito realizado com sucesso", c.saldo
+    } else {
+        return "Valor do deposito menor que zero", c.saldo
+    }
+}COPIAR CÓDIGO
+Vamos salvar e agora teremos implementado os comportamentos.
+
+Deixamos a visibilidade do saldo tanto da Conta Corrente quanto para a Poupança como privada. Agora, para obter o valor do saldo da Conta Poupança também, copiaremos para "ContaPoupança.go".
+
+Alteraremos também o ponteiro, que passará a apontar para ContaPoupanca
+
+func (c *ContaPoupanca) ObterSaldo() float64 {
+    return c.saldo
+}COPIAR CÓDIGO
+Precisaremos testar as funcionalidades de sacar, depositar o obter o valor do saldo da Conta Poupança. Criaremos um outro exemplo na "main.go" que será a contaDoDenis. Agora, a partir do pacote de contas, digitaremos um ponto final para criar uma nova ContaPoupanca{}.
+
+Utilizaremos a contaDoDenis fazendo uma visualização no terminal.
+
+func main() {
+    contaDoDenis := contas.ContaPoupanca{}
+
+    fmt.Println(contaDoDenis)
+}COPIAR CÓDIGO
+Vamos salvar e não teremos nenhum erro. Pressionaremos "Command + J" para visualizar o terminal. Limparemos o terminal com "Ctrl + L" e vamos rodar o programa.
+
+Teremos o titular vazio, que não passamos e quatro zeros, devido a nossa inicialização 0. Se formos voltar aos campos, nossa Conta Poupança conta com Número da Agência, Número da Conta, Operação e saldo.
+
+Criaremos ainda uma outra conta, contaDaPati, na função main(). Entretanto, ela será uma ContaCorrente{}. Vamos exibi-la no terminal também.
+
+func main() {
+    contaDoDenis := contas.ContaPoupanca{}
+    contaDaPati := contas.ContaCorrente{}
+
+    fmt.Println(contaDoDenis)
+    fmt.Println(contaDaPati)
+}COPIAR CÓDIGO
+Quando executarmos, veremos que a contaDoDenis tem um 0 a mais, indicando um campo a mais, então de fato estamos criando uma Conta Poupança e uma Conta Corrente.
+
+No nosso exemplo, vamos trabalhar com a conta corrente porque queremos fazer algumas operações. Começaremos depositando algum dinheiro na contaDoDenis. Vamos tentar a princípio depositar um valor negativo.
+
+func main() {
+    contaDoDenis := contas.ContaPoupanca{}
+    contaDoDenis.Depositar(-100)
+
+    fmt.Println(contaDoDenis)
+}COPIAR CÓDIGO
+Salvaremos e executaremos e nosso último campo referente ao saldo ficará com 0. Vamos tentar visualizar só o saldo. Se escrevermos apenas saldo após contaDoDenis nos parâmetros de fmt.Println() não aparecerá nada. Mas o próprio programa indicará que existe a função ObterSaldo(), que usaremos nessa situação.
+
+fmt.Println(contaDoDenis.ObterSaldo())
+
+Assim, conseguiremos visualizar apenas o saldo no terminal, "0". Sendo assim, o depósito não foi realizado.
+
+Retiraremos o sinal de negativo da frente de "100" para tentarmos depositar esse valor. Se testarmos a aplicação assim, com o valor positivo nos parâmetros da função Depositar(), será mostrado no console que o depósito foi realizado quando executarmos.
+
+Então, vamos fazer outra operação. Para sacar da contaDoDenis, usaremos o método Sacar() e passaremos o valor 55, havendo "100" no saldo.
+
+func main() {
+    contaDoDenis := contas.ContaPoupanca{}
+    contaDoDenis.Depositar(100)
+    contaDoDenis.Sacar(55)
+
+    fmt.Println(contaDoDenis.ObterSaldo())
+}COPIAR CÓDIGO
+Agora nosso saldo já será diferente, pois quando salvarmos e executarmos será mostrado "45" no terminal.
+
+Vamos tentar sacar "5000", com contaDoDenis.Sacar(5000). imparemos o terminal, vamos rodar o código mais uma vez e ainda teremos "100" de saldo, ou seja, não foi possível sacar um valor acima do limite.
+
+Conseguimos criar uma Conta Poupança com comportamentos que já conhecíamos e nosso desenvolvimento ficou interessante. Podemos sacar, depositar e obter o saldo nessa conta também, portanto temos dois tipos de serviços no nosso banco.
+
+@@03
+Tipos polimórficos em Go
+
+Uma interface é a definição de um conjunto de métodos comuns a um ou mais tipos. É o que permite a criação de tipos polimórficos em Go.
+Java possui um conceito muito parecido, também chamado de interface. A grande diferença é que, em Go, um tipo implementa uma interface implicitamente.
+
+Sabendo disso, analise e marque a afirmação verdadeira.
+
+Em Go, usamos as palavras reservadas implements e extends para implementar uma interface.
+ 
+Alternativa correta
+Podemos reaproveitar métodos ou funções entre tipos utilizando interface.
+ 
+Certo! Nosso projeto é um exemplo disso. Reutilizamos o método Sacar para pagar os boletos com ambas as contas.
+Alternativa correta
+Entender o conceito de interface na linguagem Go, não é tão importante assim.
+
+@@04
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo antes de concluir o curso.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de finalizar o curso. Ficou com dúvida? Podemos te ajudar pelo nosso fórum
+
+@@05
+O que aprendemos?
+
+Nessa aula:
+Criamos um novo tipo de conta: a ContaPoupança;
+Para finalizar, criamos um novo tipo interface onde podemos utilizar tanto a conta corrente como poupança para pagar um boleto através da função Sacar.
+Projeto final do curso
+Neste link, você fará o download do projeto feito até esta aula.
+
+Caso queira visualizar o código desenvolvido até aqui, clique neste link.
+
+https://github.com/alura-cursos/go_oo/archive/aula5.zip
+
+https://github.com/alura-cursos/go_oo/tree/aula5
+
+@@06
+Conclusão
+
+Se você chegou até essa parte do curso, parabéns! Você está concluindo mais um curso da Alura.
+Esperamos que tenha se divertido e aprendido sobre a linguagem Go.
+
+Lembrando que nesse curso aprendemos a como trabalhar com structs; referências; funções com múltiplos retornos, como o caso de Depositar(), criada durante as aulas; funções sem retornos; composição; divisão do projeto em pacotes para conseguir trabalhar de forma separada dentro da aplicação; encapsulamento e interface, uma das maiores peculiaridades da linguagem Go.
+
+Que a vontade de aprender mais sobre a linguagem tenha aumentado.
+
+Nos vemos nos próximos cursos
+
+@@07
+Parabéns
+
+Chegou o momento de celebrar sua grande conquista!
+
+
+Todas as barreiras foram vencidas e você concluiu este curso
+Neste curso, você criou um banco utilizando a linguagem Go, capaz de sacar, depositar e transferir dinheiro entre contas, utilizando boas práticas da linguagem, como pacotes, visibilidade, composição e interface. Além disso, aprendeu a importância de manter o código limpo, legível e organizado.
+
+Nossa, quanta coisa legal!
+
+Agora, dê a nota do curso, pegue seu certificado e comemore bastante essa conquista.
+"As grandes idéias surgem da observação dos pequenos detalhes." (Augusto Cury)
+
+Parabéns!!!
+
+Guilherme Lima
+
+https://www.linkedin.com/in/guilherme-lima-developer/
